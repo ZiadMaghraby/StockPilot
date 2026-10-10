@@ -129,7 +129,7 @@ Additional v0.1 boundaries: USD only, no payments/tax/refunds, bounded lists wit
 
 See the [five-minute demo and CV guide](docs/DEMO-AND-CV.md), [contribution guide](CONTRIBUTING.md), and [roadmap](docs/ROADMAP.md). Work is organized as issue → branch → focused PR → CI → merge. All initial project PRs are self-authored work; they are not external maintainer endorsements.
 
-Built with AI assistance. Review the code, understand the design decisions, and use the interview guide to make the project your own.
+Explore the architecture guide for design decisions, the integration tests for verified behavior, and the roadmap for planned improvements.
 
 ## License
 

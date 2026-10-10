@@ -21,7 +21,7 @@ Use wording you understand and can defend. A starting point after reviewing the 
 
 Repository: https://github.com/ZiadMaghraby/StockPilot
 
-Do not claim production customers, uptime, throughput, SQL Server validation, Docker execution, or cloud deployment without performing and recording that work. The Docker configuration is supplied but was not run in the initial development environment. This version was developed with AI assistance; be transparent if asked and be ready to explain and modify the code yourself.
+Do not claim production customers, uptime, throughput, SQL Server validation, Docker execution, or cloud deployment without performing and recording that work. The Docker configuration is supplied but was not run in the initial development environment. Be ready to explain the design decisions, demonstrate the tested workflows, and modify the code.
 
 ## Questions worth practicing
 
