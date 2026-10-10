@@ -1,5 +1,37 @@
 @page
 @model StockPilot.Web.Pages.ActivityModel
 @{ ViewData["Title"] = "Activity"; }
-<header class="page-heading"><div><span class="eyebrow">EVERY CHANGE HAS A STORY</span><h1>Activity<span class="title-dot">.</span></h1><p class="muted">A traceable history of your workspace operations.</p></div><span class="pill">Latest 100 events · UTC</span></header>
-<section class="panel"><div class="table-scroll"><table><thead><tr><th>Event</th><th>Details</th><th>By</th><th>When (UTC)</th></tr></thead><tbody>@foreach(var item in Model.Entries) { <tr><td><strong>@item.Action</strong></td><td>@item.Detail</td><td>@item.Actor</td><td class="mono">@item.CreatedAt.ToString("MMM dd, HH:mm:ss")</td></tr> }@if(Model.Entries.Count == 0) { <tr><td colspan="4" class="empty">Your workspace history will appear here as you work.</td></tr> }</tbody></table></div></section>
+<header class="page-heading">
+<div>
+<span class="eyebrow">EVERY CHANGE HAS A STORY</span>
+<h1>Activity<span class="title-dot">.</span>
+</h1>
+<p class="muted">A traceable history of your workspace operations.</p>
+</div>
+<span class="pill">Latest 100 events · UTC</span>
+</header>
+<section class="panel">
+<div class="table-scroll">
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Details</th>
+<th>By</th>
+<th>When (UTC)</th>
+</tr>
+</thead>
+<tbody>@foreach(var item in Model.Entries) { <tr>
+<td>
+<strong>@item.Action</strong>
+</td>
+<td>@item.Detail</td>
+<td>@item.Actor</td>
+<td class="mono">@item.CreatedAt.ToString("MMM dd, HH:mm:ss")</td>
+</tr> }@if(Model.Entries.Count == 0) { <tr>
+<td colspan="4" class="empty">Your workspace history will appear here as you work.</td>
+</tr> }</tbody>
+</table>
+</div>
+</section>
+

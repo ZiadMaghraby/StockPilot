@@ -1,13 +1,108 @@
 @page
 @model StockPilot.Web.Pages.InventoryModel
 @{ ViewData["Title"] = "Inventory"; }
-<header class="page-heading"><div><span class="eyebrow">YOUR CATALOG, UNDER CONTROL</span><h1>Inventory<span class="title-dot">.</span></h1><p class="muted">Know what’s on hand, reserved, and ready to sell.</p></div><a class="button secondary" asp-page="/Orders">Create an order ↗</a></header>
-<div asp-validation-summary="All" class="validation" role="alert"></div>
-<section class="panel"><div class="panel-header"><h2>Product catalog <span class="count">@Model.Products.Count</span></h2><form method="get" class="search-form"><input asp-for="Search" aria-label="Search products" placeholder="Search name or SKU…" /><button class="button secondary" type="submit">Search</button></form></div><div class="table-scroll"><table><thead><tr><th>Product</th><th>SKU</th><th>Price</th><th>On hand</th><th>Reserved</th><th>Available</th><th>Status</th></tr></thead><tbody>
-@foreach (var p in Model.Products) { <tr><td><strong>@p.Name</strong><small>@p.Category</small></td><td class="mono">@p.Sku</td><td>@((p.PriceCents / 100m).ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US")))</td><td>@p.OnHand</td><td>@p.Reserved</td><td><strong>@p.Available</strong></td><td><span class="badge @(p.Available <= p.ReorderPoint ? "amber" : "green")">@(p.Available <= p.ReorderPoint ? "Low stock" : "In stock")</span></td></tr> }
-@if (Model.Products.Count == 0) { <tr><td colspan="7" class="empty">No products found. Add your first product below.</td></tr> }
-</tbody></table></div><div class="panel-footer">Showing up to 250 products · Prices in USD</div></section>
-<div class="two-columns">
-@if (User.IsInRole("Admin")) { <section class="panel form-panel"><span class="eyebrow">GROW YOUR CATALOG</span><h2>Add a product</h2><form method="post" asp-page-handler="Create"><div class="form-row"><div><label asp-for="Sku">SKU</label><input asp-for="Sku" maxlength="40" placeholder="KB-105" required /></div><div><label asp-for="Category"></label><input asp-for="Category" maxlength="40" required /></div></div><label asp-for="ProductName">Product name</label><input asp-for="ProductName" maxlength="100" required /><div class="form-row"><div><label asp-for="Price">Unit price (USD)</label><input asp-for="Price" type="number" min="0" max="1000000" step="0.01" required /></div><div><label asp-for="ReorderPoint">Low-stock threshold</label><input asp-for="ReorderPoint" type="number" min="0" max="1000000" required /></div></div><button class="button" type="submit">Add product +</button></form></section> }
-@if (User.IsInRole("Admin") || User.IsInRole("Operator")) { <section class="panel form-panel"><span class="eyebrow">KEEP THINGS MOVING</span><h2>Receive stock</h2><form method="post" asp-page-handler="Receive"><label for="productId">Product</label><select id="productId" name="productId" required><option value="">Choose a product</option>@foreach(var p in Model.Products) { <option value="@p.Id">@p.Name (@p.Sku)</option> }</select><label for="quantity">Quantity received</label><input id="quantity" name="quantity" type="number" min="1" max="10000" value="1" required /><label for="note">Receipt reference</label><input id="note" name="note" maxlength="200" placeholder="Supplier delivery / PO-1042" required /><button class="button" type="submit">Receive stock ↗</button></form></section> }
+<header class="page-heading">
+<div>
+<span class="eyebrow">YOUR CATALOG, UNDER CONTROL</span>
+<h1>Inventory<span class="title-dot">.</span>
+</h1>
+<p class="muted">Know what’s on hand, reserved, and ready to sell.</p>
 </div>
+<a class="button secondary" asp-page="/Orders">Create an order ↗</a>
+</header>
+<div asp-validation-summary="All" class="validation" role="alert">
+</div>
+<section class="panel">
+<div class="panel-header">
+<h2>Product catalog <span class="count">@Model.Products.Count</span>
+</h2>
+<form method="get" class="search-form">
+<input asp-for="Search" aria-label="Search products" placeholder="Search name or SKU…" />
+<button class="button secondary" type="submit">Search</button>
+</form>
+</div>
+<div class="table-scroll">
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>SKU</th>
+<th>Price</th>
+<th>On hand</th>
+<th>Reserved</th>
+<th>Available</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+@foreach (var p in Model.Products) { <tr>
+<td>
+<strong>@p.Name</strong>
+<small>@p.Category</small>
+</td>
+<td class="mono">@p.Sku</td>
+<td>@((p.PriceCents / 100m).ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US")))</td>
+<td>@p.OnHand</td>
+<td>@p.Reserved</td>
+<td>
+<strong>@p.Available</strong>
+</td>
+<td>
+<span class="badge @(p.Available <= p.ReorderPoint ? "amber" : "green")">@(p.Available <= p.ReorderPoint ? "Low stock" : "In stock")</span>
+</td>
+</tr> }
+@if (Model.Products.Count == 0) { <tr>
+<td colspan="7" class="empty">No products found. Add your first product below.</td>
+</tr> }
+</tbody>
+</table>
+</div>
+<div class="panel-footer">Showing up to 250 products · Prices in USD</div>
+</section>
+<div class="two-columns">
+@if (User.IsInRole("Admin")) { <section class="panel form-panel">
+<span class="eyebrow">GROW YOUR CATALOG</span>
+<h2>Add a product</h2>
+<form method="post" asp-page-handler="Create">
+<div class="form-row">
+<div>
+<label asp-for="Sku">SKU</label>
+<input asp-for="Sku" maxlength="40" placeholder="KB-105" required />
+</div>
+<div>
+<label asp-for="Category">
+</label>
+<input asp-for="Category" maxlength="40" required />
+</div>
+</div>
+<label asp-for="ProductName">Product name</label>
+<input asp-for="ProductName" maxlength="100" required />
+<div class="form-row">
+<div>
+<label asp-for="Price">Unit price (USD)</label>
+<input asp-for="Price" type="number" min="0" max="1000000" step="0.01" required />
+</div>
+<div>
+<label asp-for="ReorderPoint">Low-stock threshold</label>
+<input asp-for="ReorderPoint" type="number" min="0" max="1000000" required />
+</div>
+</div>
+<button class="button" type="submit">Add product +</button>
+</form>
+</section> }
+@if (User.IsInRole("Admin") || User.IsInRole("Operator")) { <section class="panel form-panel">
+<span class="eyebrow">KEEP THINGS MOVING</span>
+<h2>Receive stock</h2>
+<form method="post" asp-page-handler="Receive">
+<label for="productId">Product</label>
+<select id="productId" name="productId" required>
+<option value="">Choose a product</option>@foreach(var p in Model.Products) { <option value="@p.Id">@p.Name (@p.Sku)</option> }</select>
+<label for="quantity">Quantity received</label>
+<input id="quantity" name="quantity" type="number" min="1" max="10000" value="1" required />
+<label for="note">Receipt reference</label>
+<input id="note" name="note" maxlength="200" placeholder="Supplier delivery / PO-1042" required />
+<button class="button" type="submit">Receive stock ↗</button>
+</form>
+</section> }
+</div>
+

@@ -1,4 +1,25 @@
 @page
 @model StockPilot.Web.Pages.Account.RegisterModel
 @{ ViewData["Title"] = "Create workspace"; }
-<section class="panel narrow"><span class="eyebrow">LET’S GET ORGANIZED</span><h1>Your workspace starts here.</h1><p class="muted">Create your company account. You’ll be the workspace administrator.</p><form method="post"><div asp-validation-summary="All" class="validation" role="alert"></div><label asp-for="Company">Company name</label><input asp-for="Company" maxlength="100" required /><label asp-for="Email">Work email</label><input asp-for="Email" autocomplete="username" required /><label asp-for="Password"></label><input asp-for="Password" autocomplete="new-password" minlength="12" required /><small class="muted">At least 12 characters, with uppercase, lowercase, a number, and a symbol.</small><button class="button full" type="submit">Create workspace ↗</button></form><p><a asp-page="Login">Back to sign in</a></p></section>
+<section class="panel narrow">
+<span class="eyebrow">LET’S GET ORGANIZED</span>
+<h1>Your workspace starts here.</h1>
+<p class="muted">Create your company account. You’ll be the workspace administrator.</p>
+<form method="post">
+<div asp-validation-summary="All" class="validation" role="alert">
+</div>
+<label asp-for="Company">Company name</label>
+<input asp-for="Company" maxlength="100" required />
+<label asp-for="Email">Work email</label>
+<input asp-for="Email" autocomplete="username" required />
+<label asp-for="Password">
+</label>
+<input asp-for="Password" autocomplete="new-password" minlength="12" required />
+<small class="muted">At least 12 characters, with uppercase, lowercase, a number, and a symbol.</small>
+<button class="button full" type="submit">Create workspace ↗</button>
+</form>
+<p>
+<a asp-page="Login">Back to sign in</a>
+</p>
+</section>
+

@@ -2,8 +2,47 @@
 @model StockPilot.Web.Pages.Account.LoginModel
 @{ ViewData["Title"] = "Sign in"; }
 <div class="auth-grid">
-    <section class="auth-story"><span class="eyebrow">YOUR OPERATIONS, IN SYNC</span><h1>Good inventory.<br />Great decisions.</h1><p>One workspace for your products, stock, and orders. Know what is available. Keep every movement accountable.</p><div class="story-graphic"><div class="graphic-bar bar-one"></div><div class="graphic-bar bar-two"></div><div class="graphic-bar bar-three"></div><div class="graphic-bar bar-four"></div><span>Clarity at every level.</span></div><small>STOCKPILOT / INVENTORY &amp; ORDER MANAGEMENT</small></section>
-    <section class="auth-form panel"><span class="eyebrow">WELCOME BACK</span><h2>Sign in to your workspace</h2><p class="muted">Your next great workday starts here.</p><form method="post"><div asp-validation-summary="All" class="validation" role="alert"></div><label asp-for="Email">Work email</label><input asp-for="Email" type="email" autocomplete="username" placeholder="you@company.com" required /><label asp-for="Password"></label><input asp-for="Password" autocomplete="current-password" required /><button class="button full" type="submit">Sign in <span>↗</span></button></form><p class="muted">New here? <a asp-page="Register">Create a workspace</a></p>
-    @if (Model.DemoEnabled) { <div class="demo-box"><strong>Explore the demo</strong><p>admin@stockpilot.demo<br /><code>StockPilot!2026</code></p><small>Sample data · local development only</small></div> }
+    <section class="auth-story">
+<span class="eyebrow">YOUR OPERATIONS, IN SYNC</span>
+<h1>Good inventory.<br />Great decisions.</h1>
+<p>One workspace for your products, stock, and orders. Know what is available. Keep every movement accountable.</p>
+<div class="story-graphic">
+<div class="graphic-bar bar-one">
+</div>
+<div class="graphic-bar bar-two">
+</div>
+<div class="graphic-bar bar-three">
+</div>
+<div class="graphic-bar bar-four">
+</div>
+<span>Clarity at every level.</span>
+</div>
+<small>STOCKPILOT / INVENTORY &amp; ORDER MANAGEMENT</small>
+</section>
+    <section class="auth-form panel">
+<span class="eyebrow">WELCOME BACK</span>
+<h2>Sign in to your workspace</h2>
+<p class="muted">Your next great workday starts here.</p>
+<form method="post">
+<div asp-validation-summary="All" class="validation" role="alert">
+</div>
+<label asp-for="Email">Work email</label>
+<input asp-for="Email" type="email" autocomplete="username" placeholder="you@company.com" required />
+<label asp-for="Password">
+</label>
+<input asp-for="Password" autocomplete="current-password" required />
+<button class="button full" type="submit">Sign in <span>↗</span>
+</button>
+</form>
+<p class="muted">New here? <a asp-page="Register">Create a workspace</a>
+</p>
+    @if (Model.DemoEnabled) { <div class="demo-box">
+<strong>Explore the demo</strong>
+<p>admin@stockpilot.demo<br />
+<code>StockPilot!2026</code>
+</p>
+<small>Sample data · local development only</small>
+</div> }
     </section>
 </div>
+

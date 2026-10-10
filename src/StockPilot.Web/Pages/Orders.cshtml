@@ -2,10 +2,82 @@
 @model StockPilot.Web.Pages.OrdersModel
 @using StockPilot.Web.Domain
 @{ ViewData["Title"] = "Orders"; }
-<header class="page-heading"><div><span class="eyebrow">FROM RESERVATION TO SHIPMENT</span><h1>Orders<span class="title-dot">.</span></h1><p class="muted">Keep every commitment backed by available stock.</p></div><span class="pill">Reserve → Confirm or cancel</span></header>
-<div asp-validation-summary="All" class="validation" role="alert"></div>
-<section class="panel"><div class="panel-header"><h2>Recent orders <span class="count">@Model.Orders.Count</span></h2><span class="muted">Latest 100 orders</span></div><div class="table-scroll"><table><thead><tr><th>Order / Customer</th><th>Product</th><th>Qty</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead><tbody>
-@foreach(var o in Model.Orders) { <tr><td><strong>@o.Customer</strong><small class="mono">SP-@o.Id.ToString()[..8].ToUpperInvariant() · @o.CreatedAt.ToString("MMM dd") UTC</small></td><td>@o.ProductName</td><td>@o.Quantity</td><td>@((o.TotalCents / 100m).ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US")))</td><td><span class="badge @(o.Status == OrderStatus.Confirmed ? "green" : o.Status == OrderStatus.Reserved ? "blue" : "gray")">@o.Status</span></td><td>@if(o.Status == OrderStatus.Reserved && (User.IsInRole("Admin") || User.IsInRole("Operator"))) { <form method="post" asp-page-handler="Transition" class="inline-form"><input type="hidden" name="orderId" value="@o.Id" /><button class="text-button" name="next" value="Confirmed">Ship</button><button class="text-button danger" name="next" value="Cancelled">Cancel</button></form> } else { <span class="muted">—</span> }</td></tr> }
-@if(Model.Orders.Count == 0) { <tr><td colspan="6" class="empty">No orders yet. Your first reservation starts below.</td></tr> }
-</tbody></table></div></section>
-@if(User.IsInRole("Admin") || User.IsInRole("Operator")) { <section class="panel form-panel order-create"><span class="eyebrow">MAKE YOUR NEXT MOVE</span><h2>Reserve a new order</h2><p class="muted">Reserving holds available units. Shipping deducts them from on-hand stock.</p><form method="post" asp-page-handler="Create"><input asp-for="RequestId" type="hidden" /><div class="form-row"><div><label for="customer">Customer</label><input id="customer" name="customer" maxlength="100" placeholder="Company or customer name" required /></div><div><label for="productId">Product</label><select id="productId" name="productId" required><option value="">Choose a product</option>@foreach(var p in Model.Products) { <option value="@p.Id">@p.Name · @p.Available available</option> }</select></div><div><label for="quantity">Quantity</label><input id="quantity" name="quantity" type="number" min="1" max="10000" value="1" required /></div></div><button class="button" type="submit">Reserve order ↗</button></form></section> }
+<header class="page-heading">
+<div>
+<span class="eyebrow">FROM RESERVATION TO SHIPMENT</span>
+<h1>Orders<span class="title-dot">.</span>
+</h1>
+<p class="muted">Keep every commitment backed by available stock.</p>
+</div>
+<span class="pill">Reserve → Confirm or cancel</span>
+</header>
+<div asp-validation-summary="All" class="validation" role="alert">
+</div>
+<section class="panel">
+<div class="panel-header">
+<h2>Recent orders <span class="count">@Model.Orders.Count</span>
+</h2>
+<span class="muted">Latest 100 orders</span>
+</div>
+<div class="table-scroll">
+<table>
+<thead>
+<tr>
+<th>Order / Customer</th>
+<th>Product</th>
+<th>Qty</th>
+<th>Total</th>
+<th>Status</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody>
+@foreach(var o in Model.Orders) { <tr>
+<td>
+<strong>@o.Customer</strong>
+<small class="mono">SP-@o.Id.ToString()[..8].ToUpperInvariant() · @o.CreatedAt.ToString("MMM dd") UTC</small>
+</td>
+<td>@o.ProductName</td>
+<td>@o.Quantity</td>
+<td>@((o.TotalCents / 100m).ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US")))</td>
+<td>
+<span class="badge @(o.Status == OrderStatus.Confirmed ? "green" : o.Status == OrderStatus.Reserved ? "blue" : "gray")">@o.Status</span>
+</td>
+<td>@if(o.Status == OrderStatus.Reserved && (User.IsInRole("Admin") || User.IsInRole("Operator"))) { <form method="post" asp-page-handler="Transition" class="inline-form">
+<input type="hidden" name="orderId" value="@o.Id" />
+<button class="text-button" name="next" value="Confirmed">Ship</button>
+<button class="text-button danger" name="next" value="Cancelled">Cancel</button>
+</form> } else { <span class="muted">—</span> }</td>
+</tr> }
+@if(Model.Orders.Count == 0) { <tr>
+<td colspan="6" class="empty">No orders yet. Your first reservation starts below.</td>
+</tr> }
+</tbody>
+</table>
+</div>
+</section>
+@if(User.IsInRole("Admin") || User.IsInRole("Operator")) { <section class="panel form-panel order-create">
+<span class="eyebrow">MAKE YOUR NEXT MOVE</span>
+<h2>Reserve a new order</h2>
+<p class="muted">Reserving holds available units. Shipping deducts them from on-hand stock.</p>
+<form method="post" asp-page-handler="Create">
+<input asp-for="RequestId" type="hidden" />
+<div class="form-row">
+<div>
+<label for="customer">Customer</label>
+<input id="customer" name="customer" maxlength="100" placeholder="Company or customer name" required />
+</div>
+<div>
+<label for="productId">Product</label>
+<select id="productId" name="productId" required>
+<option value="">Choose a product</option>@foreach(var p in Model.Products) { <option value="@p.Id">@p.Name · @p.Available available</option> }</select>
+</div>
+<div>
+<label for="quantity">Quantity</label>
+<input id="quantity" name="quantity" type="number" min="1" max="10000" value="1" required />
+</div>
+</div>
+<button class="button" type="submit">Reserve order ↗</button>
+</form>
+</section> }
+

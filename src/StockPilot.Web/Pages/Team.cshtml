@@ -1,5 +1,56 @@
 @page
 @model StockPilot.Web.Pages.TeamModel
 @{ ViewData["Title"] = "Team"; }
-<header class="page-heading"><div><span class="eyebrow">BUILT FOR YOUR PEOPLE</span><h1>Team<span class="title-dot">.</span></h1><p class="muted">The right access for everyone in your workspace.</p></div></header>
-<div class="two-columns"><section class="panel"><div class="panel-header"><h2>Workspace members</h2><span class="count">@Model.Members.Count</span></div><div class="table-scroll"><table><thead><tr><th>Email</th><th>Role</th></tr></thead><tbody>@foreach(var member in Model.Members) { <tr><td>@member.Email</td><td><span class="badge @(member.AccessRole == "Admin" ? "blue" : "gray")">@member.AccessRole</span></td></tr> }</tbody></table></div></section><section class="panel form-panel"><h2>Add a team member</h2><div asp-validation-summary="All" class="validation" role="alert"></div><form method="post"><label asp-for="Email">Email address</label><input asp-for="Email" required /><label asp-for="AccessRole">Role</label><select asp-for="AccessRole"><option>Viewer</option><option>Operator</option><option>Admin</option></select><p class="muted small">Viewers can browse. Operators handle stock and orders. Admins also manage products and team members.</p><label asp-for="Password">Password</label><input asp-for="Password" autocomplete="new-password" minlength="12" required /><small class="muted">12+ characters with uppercase, lowercase, number, and symbol. Share credentials privately.</small><button class="button" type="submit">Add team member +</button></form></section></div>
+<header class="page-heading">
+<div>
+<span class="eyebrow">BUILT FOR YOUR PEOPLE</span>
+<h1>Team<span class="title-dot">.</span>
+</h1>
+<p class="muted">The right access for everyone in your workspace.</p>
+</div>
+</header>
+<div class="two-columns">
+<section class="panel">
+<div class="panel-header">
+<h2>Workspace members</h2>
+<span class="count">@Model.Members.Count</span>
+</div>
+<div class="table-scroll">
+<table>
+<thead>
+<tr>
+<th>Email</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>@foreach(var member in Model.Members) { <tr>
+<td>@member.Email</td>
+<td>
+<span class="badge @(member.AccessRole == "Admin" ? "blue" : "gray")">@member.AccessRole</span>
+</td>
+</tr> }</tbody>
+</table>
+</div>
+</section>
+<section class="panel form-panel">
+<h2>Add a team member</h2>
+<div asp-validation-summary="All" class="validation" role="alert">
+</div>
+<form method="post">
+<label asp-for="Email">Email address</label>
+<input asp-for="Email" required />
+<label asp-for="AccessRole">Role</label>
+<select asp-for="AccessRole">
+<option>Viewer</option>
+<option>Operator</option>
+<option>Admin</option>
+</select>
+<p class="muted small">Viewers can browse. Operators handle stock and orders. Admins also manage products and team members.</p>
+<label asp-for="Password">Password</label>
+<input asp-for="Password" autocomplete="new-password" minlength="12" required />
+<small class="muted">12+ characters with uppercase, lowercase, number, and symbol. Share credentials privately.</small>
+<button class="button" type="submit">Add team member +</button>
+</form>
+</section>
+</div>
+
