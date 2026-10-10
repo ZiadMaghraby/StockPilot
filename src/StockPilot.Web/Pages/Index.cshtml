@@ -1,0 +1,130 @@
+@page
+@model StockPilot.Web.Pages.IndexModel
+@using StockPilot.Web.Domain
+@using System.Globalization
+@{ ViewData["Title"] = "Overview"; var culture = CultureInfo.GetCultureInfo("en-US"); }
+<header class="page-heading">
+<div>
+<span class="eyebrow">A CLEAR VIEW OF WHAT’S NEXT</span>
+<h1>Operations overview<span class="title-dot">.</span>
+</h1>
+<p class="muted">A little clarity. A lot of forward motion.</p>
+</div>
+<a class="button" asp-page="/Orders">New order <span>↗</span>
+</a>
+</header>
+<section class="metrics" aria-label="Workspace metrics">
+<article class="metric">
+<span class="metric-label">Inventory value <span>↗</span>
+</span>
+<strong>@((Model.InventoryValueCents / 100m).ToString("C0", culture))</strong>
+<small>On-hand stock at catalog price</small>
+</article>
+<article class="metric">
+<span class="metric-label">Available units <span>▦</span>
+</span>
+<strong>@Model.AvailableUnits.ToString("N0")</strong>
+<small>Across @Model.ProductCount active products</small>
+</article>
+<article class="metric">
+<span class="metric-label">Awaiting shipment <span>⇢</span>
+</span>
+<strong>@Model.PendingOrders.ToString("D2")</strong>
+<small>Reserved and ready for your next move</small>
+</article>
+<article class="metric accent">
+<span class="metric-label">Shipped order value <span>✓</span>
+</span>
+<strong>@((Model.ShippedRevenueCents / 100m).ToString("C0", culture))</strong>
+<small>All confirmed orders · USD</small>
+</article>
+</section>
+<div class="dashboard-grid">
+<section class="panel">
+<div class="panel-header">
+<div>
+<span class="eyebrow">THE BIG PICTURE</span>
+<h2>Available stock by category</h2>
+</div>
+<span class="badge green">Live inventory</span>
+</div>
+<div class="category-chart">@foreach(var category in Model.Categories) { <div class="chart-row">
+<div class="chart-label">
+<span>@category.Name</span>
+<strong>@category.Units <small>units</small>
+</strong>
+</div>
+<meter min="0" max="@Math.Max(1, Model.Categories.Max(x => x.Units))" value="@category.Units">@category.Units</meter>
+</div> }@if(Model.Categories.Count == 0) { <p class="empty">Add products and receive stock to see your inventory breakdown.</p> }</div>
+<div class="panel-footer">Available = on hand − reserved · Top 5 categories</div>
+</section>
+<section class="panel attention">
+<div class="panel-header">
+<div>
+<span class="eyebrow">A LITTLE ATTENTION</span>
+<h2>Restock radar</h2>
+</div>
+<span class="radar-dot">
+</span>
+</div>
+<div class="restock-list">@foreach(var p in Model.LowStock) { <div class="restock-item">
+<div>
+<strong>@p.Name</strong>
+<small>@p.Sku · Threshold @p.ReorderPoint</small>
+</div>
+<span class="stock-number">@p.Available<small>left</small>
+</span>
+</div> }@if(Model.LowStock.Count == 0) { <p class="empty">You’re all set. No products are below their stock threshold.</p> }</div>
+<a class="panel-link" asp-page="/Inventory">Manage inventory <span>↗</span>
+</a>
+</section>
+</div>
+<div class="dashboard-grid">
+<section class="panel">
+<div class="panel-header">
+<h2>Latest orders</h2>
+<a asp-page="/Orders">View all ↗</a>
+</div>
+<div class="table-scroll">
+<table>
+<thead>
+<tr>
+<th>Customer</th>
+<th>Items</th>
+<th>Total</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>@foreach(var order in Model.RecentOrders) { <tr>
+<td>
+<strong>@order.Customer</strong>
+<small>SP-@order.Id.ToString()[..8].ToUpperInvariant()</small>
+</td>
+<td>@order.Quantity</td>
+<td>@((order.TotalCents / 100m).ToString("C", culture))</td>
+<td>
+<span class="badge @(order.Status == OrderStatus.Confirmed ? "green" : order.Status == OrderStatus.Reserved ? "blue" : "gray")">@order.Status</span>
+</td>
+</tr> }@if(Model.RecentOrders.Count == 0) { <tr>
+<td colspan="4" class="empty">No orders yet. Create your first reservation.</td>
+</tr> }</tbody>
+</table>
+</div>
+</section>
+<section class="panel">
+<div class="panel-header">
+<h2>Workspace pulse</h2>
+<a asp-page="/Activity">All activity ↗</a>
+</div>
+<div class="activity-list">@foreach(var item in Model.RecentActivity) { <div class="activity-item">
+<span class="activity-marker">
+</span>
+<div>
+<strong>@item.Action</strong>
+<p>@item.Detail</p>
+<small>@item.CreatedAt.ToString("MMM dd · HH:mm") UTC</small>
+</div>
+</div> }@if(Model.RecentActivity.Count == 0) { <p class="empty">Your workspace activity will appear here.</p> }</div>
+</section>
+</div>
+

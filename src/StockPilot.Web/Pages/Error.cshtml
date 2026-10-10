@@ -1,0 +1,16 @@
+@page
+@model ErrorModel
+@{ ViewData["Title"] = "Something went wrong"; }
+<section class="panel narrow">
+    <span class="eyebrow">LET’S GET YOU BACK ON TRACK</span>
+    <h1>We couldn’t complete that request.</h1>
+    <p class="muted">Please try again. If the problem continues, share the reference below with your workspace administrator.</p>
+    @if (Model.ShowRequestId)
+    {
+        <p>
+<strong>Reference:</strong> <code>@Model.RequestId</code>
+</p>
+    }
+    <a class="button" asp-page="/Index">Return to overview</a>
+</section>
+

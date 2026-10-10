@@ -1,0 +1,32 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+      - name: Restore pinned dependencies
+        run: dotnet restore --locked-mode
+      - name: Build with warnings as errors
+        run: dotnet build --configuration Release --no-restore
+      - name: Run integration tests against SQLite
+        run: dotnet test --configuration Release --no-build --logger trx --collect:"XPlat Code Coverage" --results-directory TestResults
+      - name: Publish application
+        run: dotnet publish src/StockPilot.Web --configuration Release --no-build --output publish
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: TestResults/
