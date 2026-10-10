@@ -1,0 +1,10 @@
+**/bin
+**/obj
+**/*.db*
+.git
+.github
+**/TestResults
+publish
+.env*
+**/*.pfx
+**/*.key

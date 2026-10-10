@@ -1,0 +1,16 @@
+services:
+  stockpilot:
+    build: .
+    ports:
+      - "127.0.0.1:5188:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      Database__Initialize: "true"
+      Demo__Enabled: "true"
+      AllowedHosts: "localhost;127.0.0.1"
+    volumes:
+      - stockpilot-data:/data
+      - stockpilot-keys:/home/app/.aspnet/DataProtection-Keys
+volumes:
+  stockpilot-data:
+  stockpilot-keys:
