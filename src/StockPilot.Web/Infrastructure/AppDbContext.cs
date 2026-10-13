@@ -38,7 +38,19 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantSession 
         b.Entity<AuditEntry>().HasIndex(x => new { x.TenantId, x.CreatedAt });
     }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        ValidateTenantWrites();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        ValidateTenantWrites();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private void ValidateTenantWrites()
     {
         foreach (var entry in ChangeTracker.Entries<ITenantOwned>().Where(x => x.State is EntityState.Added or EntityState.Modified or EntityState.Deleted))
         {
@@ -46,6 +58,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, TenantSession 
                 (entry.State != EntityState.Added && entry.Property(nameof(ITenantOwned.TenantId)).OriginalValue is Guid original && original != TenantId))
                 throw new InvalidOperationException("Cross-tenant writes are prohibited.");
         }
-        return base.SaveChangesAsync(cancellationToken);
     }
 }
