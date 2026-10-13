@@ -292,5 +292,64 @@ public class InventoryApiTests : IDisposable
         foreach (var path in new[] { "/", "/Inventory", "/Orders", "/Activity", "/Team", "/openapi/v1.json" })
             Assert.Equal(HttpStatusCode.OK, (await client.GetAsync(path)).StatusCode);
     }
+
+    [Theory]
+    [InlineData("RequestId", "not-a-guid")]
+    [InlineData("productId", "not-a-guid")]
+    [InlineData("quantity", "three")]
+    public async Task Malformed_order_form_does_not_create_an_order_or_reserve_stock(string field, string invalidValue)
+    {
+        using var client = await Workspace();
+        var product = await Product(client);
+        var token = await FormToken(client, "/Orders");
+        var auditBefore = (await client.GetFromJsonAsync<List<AuditEntry>>("/api/audit", Json))!.Count;
+        var movementsBefore = (await client.GetFromJsonAsync<List<StockMovement>>("/api/movements", Json))!.Count;
+
+        var form = new Dictionary<string, string>
+        {
+            ["__RequestVerificationToken"] = token,
+            ["RequestId"] = Guid.NewGuid().ToString(),
+            ["productId"] = product.Id.ToString(),
+            ["quantity"] = "3",
+            ["customer"] = "Form customer"
+        };
+        form[field] = invalidValue;
+        var response = await client.PostAsync("/Orders?handler=Create", new FormUrlEncodedContent(form));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains(invalidValue, await response.Content.ReadAsStringAsync());
+        Assert.Empty((await client.GetFromJsonAsync<List<SalesOrder>>("/api/orders", Json))!);
+        var stock = await ReadProduct(client);
+        Assert.Equal(10, stock.OnHand);
+        Assert.Equal(0, stock.Reserved);
+        Assert.Equal(auditBefore, (await client.GetFromJsonAsync<List<AuditEntry>>("/api/audit", Json))!.Count);
+        Assert.Equal(movementsBefore, (await client.GetFromJsonAsync<List<StockMovement>>("/api/movements", Json))!.Count);
+    }
+
+    [Fact]
+    public async Task Valid_order_form_retries_keep_one_reservation()
+    {
+        using var client = await Workspace();
+        var product = await Product(client);
+        var token = await FormToken(client, "/Orders");
+        var form = new Dictionary<string, string>
+        {
+            ["__RequestVerificationToken"] = token,
+            ["RequestId"] = Guid.NewGuid().ToString(),
+            ["productId"] = product.Id.ToString(),
+            ["quantity"] = "3",
+            ["customer"] = "Form customer"
+        };
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            var response = await client.PostAsync("/Orders?handler=Create", new FormUrlEncodedContent(form));
+            Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        }
+        Assert.Single((await client.GetFromJsonAsync<List<SalesOrder>>("/api/orders", Json))!);
+        var stock = await ReadProduct(client);
+        Assert.Equal(10, stock.OnHand);
+        Assert.Equal(3, stock.Reserved);
+        Assert.Single((await client.GetFromJsonAsync<List<StockMovement>>("/api/movements", Json))!, x => x.Kind == "Reserved");
+    }
 }
 
