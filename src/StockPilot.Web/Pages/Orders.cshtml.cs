@@ -18,6 +18,7 @@ public class OrdersModel(AppDbContext db, InventoryService inventory) : PageMode
     }
     public async Task<IActionResult> OnPostCreateAsync(Guid productId, int quantity, string customer)
     {
+        if (!ModelState.IsValid) { await OnGetAsync(); return Page(); }
         try { await inventory.Reserve(new(productId, quantity, customer, RequestId)); TempData["Success"] = "Order reserved. Confirm shipment or cancel to release the stock."; return RedirectToPage(); }
         catch (BusinessException error) { ModelState.AddModelError("", error.Message); await OnGetAsync(); return Page(); }
     }
