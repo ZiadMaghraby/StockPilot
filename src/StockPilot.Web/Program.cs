@@ -87,12 +87,20 @@ app.MapHealthChecks("/health").AllowAnonymous();
 app.MapOpenApi().RequireAuthorization();
 var api = app.MapGroup("/api").RequireAuthorization();
 api.MapGet("/csrf", (IAntiforgery csrf, HttpContext context) => Results.Ok(new { token = csrf.GetAndStoreTokens(context).RequestToken }));
-api.MapGet("/products", async (AppDbContext db) => await db.Products.AsNoTracking().OrderBy(x => x.Name).Take(250).ToListAsync());
-api.MapGet("/orders", async (AppDbContext db) => await db.Orders.AsNoTracking().OrderByDescending(x => x.CreatedAt).Take(250).ToListAsync());
+api.MapGet("/products", (AppDbContext db, HttpContext context, int page = 1, int pageSize = 250) =>
+    PagedQuery.Read(db.Products.AsNoTracking().OrderBy(x => x.Name).ThenBy(x => x.Id), context, page, pageSize))
+    .WithDescription("Company-scoped products ordered by name, then ID. page starts at 1; pageSize is 1–250 (default 250). Returns an array with X-Total-Count, X-Page and X-Page-Size response headers.");
+api.MapGet("/orders", (AppDbContext db, HttpContext context, int page = 1, int pageSize = 250) =>
+    PagedQuery.Read(db.Orders.AsNoTracking().OrderByDescending(x => x.CreatedAt).ThenByDescending(x => x.Id), context, page, pageSize))
+    .WithDescription("Company-scoped orders ordered by creation time, then ID, descending. page starts at 1; pageSize is 1–250 (default 250). Returns an array with X-Total-Count, X-Page and X-Page-Size response headers.");
 api.MapGet("/orders/{id:guid}", async (Guid id, AppDbContext db) =>
     await db.Orders.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id) is { } order ? Results.Ok(order) : Results.NotFound());
-api.MapGet("/movements", async (AppDbContext db) => await db.Movements.AsNoTracking().OrderByDescending(x => x.CreatedAt).Take(250).ToListAsync());
-api.MapGet("/audit", async (AppDbContext db) => await db.Audit.AsNoTracking().OrderByDescending(x => x.CreatedAt).Take(100).ToListAsync());
+api.MapGet("/movements", (AppDbContext db, HttpContext context, int page = 1, int pageSize = 250) =>
+    PagedQuery.Read(db.Movements.AsNoTracking().OrderByDescending(x => x.CreatedAt).ThenByDescending(x => x.Id), context, page, pageSize))
+    .WithDescription("Company-scoped stock movements ordered by creation time, then ID, descending. page starts at 1; pageSize is 1–250 (default 250). Returns an array with X-Total-Count, X-Page and X-Page-Size response headers.");
+api.MapGet("/audit", (AppDbContext db, HttpContext context, int page = 1, int pageSize = 100) =>
+    PagedQuery.Read(db.Audit.AsNoTracking().OrderByDescending(x => x.CreatedAt).ThenByDescending(x => x.Id), context, page, pageSize))
+    .WithDescription("Company-scoped audit events ordered by creation time, then ID, descending. page starts at 1; pageSize is 1–250 (default 100). Returns an array with X-Total-Count, X-Page and X-Page-Size response headers.");
 var writes = api.MapGroup("").RequireAuthorization(policy => policy.RequireRole("Admin", "Operator"));
 writes.AddEndpointFilter(async (context, next) =>
 {

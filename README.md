@@ -18,8 +18,8 @@ StockPilot is a multi-tenant inventory application built with ASP.NET Core 10, E
 - **Safe retries:** tenant-scoped request IDs prevent duplicate reservations.
 - **Auditability:** stock movements and operational changes are recorded with actor and UTC timestamp.
 - **Dashboard:** inventory value, available stock, pending shipments, low-stock alerts, and recent activity.
-- **HTTP API:** authenticated endpoints with CSRF protection and an OpenAPI document.
-- **Verification:** 27 HTTP integration cases and 36 tenant write-guard cases over real SQLite databases; GitHub Actions builds, tests, and publishes.
+- **HTTP API:** authenticated endpoints with CSRF protection, paginated lists, and an OpenAPI document.
+- **Verification:** HTTP integration and tenant write-guard tests over real SQLite databases; GitHub Actions builds, tests, and publishes.
 
 This is **v0.1, a working portfolio/local-demo baseline**. It uses one stock location per company and one product per order. Production deployment and the next capabilities are tracked in [issues](https://github.com/ZiadMaghraby/StockPilot/issues).
 
@@ -64,6 +64,7 @@ Tests create isolated temporary SQLite databases and exercise the actual HTTP au
 - Invalid quantities/prices and overselling leave data unchanged.
 - Missing, empty, or malformed order request IDs leave orders, stock, movements, and audit records unchanged; valid form retries reserve only once.
 - Every operational page and the OpenAPI document renders for an administrator.
+- API pagination reaches beyond the former 100/250-row limits with stable tie ordering, company-scoped counts, and validated page boundaries.
 
 These are correctness tests, **not a throughput benchmark**. The initial dependency audit reported no known vulnerable direct or transitive packages in the configured sources.
 
@@ -125,7 +126,7 @@ Environment variables use double underscores, for example `Database__Initialize`
 
 Before a public deployment, implement versioned schema migrations and provider-specific tests, email verification/recovery and invitations, durable key storage, configured TLS/proxy handling, monitoring, and backups. `EnsureCreated` is an initial bootstrap, **not** an upgrade or migration strategy. SQL Server is not advertised as supported until its concurrency and migration work is complete. There is no hosted public demo in this release.
 
-Additional v0.1 boundaries: USD only, no payments/tax/refunds, bounded lists without pagination, one product per order, one inventory location per company, and no claimed external users or performance figures.
+Additional v0.1 boundaries: USD only, no payments/tax/refunds, bounded web-page lists (API lists support pagination), one product per order, one inventory location per company, and no claimed external users or performance figures.
 
 ## Portfolio and contribution workflow
 

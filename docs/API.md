@@ -12,17 +12,27 @@ OpenAPI is available to signed-in users at `/openapi/v1.json`. The short PowerSh
 | Method | Route | Access | Behavior |
 | --- | --- | --- | --- |
 | GET | `/api/csrf` | Signed in | Issue request token |
-| GET | `/api/products` | All roles | First 250 products, by name |
+| GET | `/api/products` | All roles | Paginated products, by name then ID |
 | POST | `/api/products` | Admin | Create product, zero opening stock |
 | POST | `/api/products/{id}/receive` | Admin, Operator | Add stock and a movement |
-| GET | `/api/orders` | All roles | Latest 250 orders |
+| GET | `/api/orders` | All roles | Paginated orders, newest first |
 | GET | `/api/orders/{id}` | All roles | Tenant-scoped order detail |
 | POST | `/api/orders` | Admin, Operator | Reserve stock; idempotent request key |
 | POST | `/api/orders/{id}/confirm` | Admin, Operator | Ship a reserved order |
 | POST | `/api/orders/{id}/cancel` | Admin, Operator | Release a reserved order |
-| GET | `/api/movements` | All roles | Latest 250 stock movements |
-| GET | `/api/audit` | All roles | Latest 100 audit events |
+| GET | `/api/movements` | All roles | Paginated stock movements, newest first |
+| GET | `/api/audit` | All roles | Paginated audit events, newest first |
 | GET | `/health` | Public | Database connectivity check |
+
+## Pagination
+
+All four list endpoints accept `page` (one-based, default `1`) and `pageSize` (1–250). The default page size remains 250 for products, orders, and movements, and 100 for audit events. Existing clients still receive a JSON array.
+
+For example, `GET /api/products?page=2&pageSize=50` returns the next 50 products. Responses include `X-Total-Count` (current company's total records), `X-Page`, and `X-Page-Size`. An empty company or a page past the end returns `[]` with the same metadata. Invalid numbers and out-of-range values return `400`.
+
+Products sort by name then ID ascending. Orders, movements, and audit events sort by creation time then ID descending. The ID tie-breaker keeps pages deterministic when names or timestamps match. Pagination uses offsets, not a snapshot: concurrent additions or deletions can shift page boundaries, and counts and rows are read separately. Clients needing a snapshot should not treat multiple page requests as one atomic export.
+
+The web interface still uses bounded lists; API pagination does not change its forms. Filters and CSV exports remain tracked in issue #8.
 
 ## Payloads
 
@@ -58,4 +68,4 @@ Use a new request ID for each logical order. Preserve it for retries. The respon
 - `404`: order detail is absent from the current company.
 - `409`: insufficient stock, duplicate SKU, reused request key with a different payload, or invalid order state.
 
-Business and CSRF errors use Problem Details with a `title`. Product availability conflicts intentionally do not reveal whether another company owns a supplied ID. List limits currently have no pagination; see the roadmap.
+Business and CSRF errors use Problem Details with a `title`. Product availability conflicts intentionally do not reveal whether another company owns a supplied ID.

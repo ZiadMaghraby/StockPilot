@@ -34,7 +34,7 @@ public sealed class TestApp : WebApplicationFactory<Program>
     }
 }
 
-public class InventoryApiTests : IDisposable
+public partial class InventoryApiTests : IDisposable
 {
     private readonly TestApp app = new();
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { Converters = { new JsonStringEnumConverter() } };
