@@ -13,6 +13,7 @@ OpenAPI is available to signed-in users at `/openapi/v1.json`. The short PowerSh
 | --- | --- | --- | --- |
 | GET | `/api/csrf` | Signed in | Issue request token |
 | GET | `/api/products` | All roles | Paginated products, by name then ID |
+| GET | `/api/products/export.csv` | All roles | Download all matching products as CSV |
 | POST | `/api/products` | Admin | Create product, zero opening stock |
 | POST | `/api/products/{id}/receive` | Admin, Operator | Add stock and a movement |
 | GET | `/api/orders` | All roles | Paginated orders, newest first |
@@ -32,7 +33,7 @@ For example, `GET /api/products?page=2&pageSize=50` returns the next 50 products
 
 Products sort by name then ID ascending. Orders, movements, and audit events sort by creation time then ID descending. The ID tie-breaker keeps pages deterministic when names or timestamps match. Pagination uses offsets, not a snapshot: concurrent additions or deletions can shift page boundaries, and counts and rows are read separately. Clients needing a snapshot should not treat multiple page requests as one atomic export.
 
-The web interface still uses bounded lists; API pagination does not change its forms. Web pagination and CSV exports remain tracked in issue #8.
+The web interface still uses bounded lists; API pagination does not change its forms. Web pagination and additional exports remain tracked in issue #8.
 
 ## List filters
 
@@ -49,6 +50,14 @@ Filters are optional and combined before pagination. `X-Total-Count` reports the
 Use ISO 8601 timestamps with `Z` or an explicit UTC offset; offset timestamps are normalized to UTC. URL-encode `+` as `%2B`. For a UTC day, use `createdFrom=2026-01-02T00:00:00Z&createdBefore=2026-01-03T00:00:00Z`. Exclusive upper bounds allow adjacent date windows without counting boundary records twice.
 
 Examples: `/api/products?search=KB-&lowStock=true&pageSize=50` and `/api/orders?status=Reserved&createdBefore=2026-01-03T00:00:00Z`. Invalid booleans, statuses, dates, reversed/empty date windows, and overlong search terms return `400`.
+
+## Inventory CSV download
+
+`GET /api/products/export.csv` downloads `stockpilot-inventory.csv` for the signed-in company. All roles may export the inventory they can read. `search` and `lowStock` work exactly as on the product list; the export streams **all** matching rows rather than one page. Empty results still include the header. Ordering is name then ID; the export is not a cross-request snapshot.
+
+Columns are `SKU,Name,Category,PriceCents,OnHand,Reserved,Available,ReorderPoint`. Numeric columns use invariant formatting, with price in integer cents. Text is UTF-8 with a BOM, CRLF record separators, quoted cells, and doubled embedded quotes; embedded commas and line breaks remain inside their cells.
+
+Potential formula text receives a leading apostrophe, including whitespace-prefixed and full-width formula markers. This follows the quoted-text mitigation described in [OWASP's CSV Injection guidance](https://owasp.org/www-community/attacks/CSV_Injection). The apostrophe changes the exported text and may be visible in importing software. Protection is not universal across spreadsheet programs or save/reopen cycles. Treat CSV as a spreadsheet-viewing format; use the JSON API when exact original text is required.
 
 ## Payloads
 

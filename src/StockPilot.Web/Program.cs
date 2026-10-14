@@ -87,6 +87,10 @@ app.MapHealthChecks("/health").AllowAnonymous();
 app.MapOpenApi().RequireAuthorization();
 var api = app.MapGroup("/api").RequireAuthorization();
 api.MapGet("/csrf", (IAntiforgery csrf, HttpContext context) => Results.Ok(new { token = csrf.GetAndStoreTokens(context).RequestToken }));
+api.MapGet("/products/export.csv", (AppDbContext db, HttpContext context, string? search = null, bool? lowStock = null) =>
+    InventoryCsv.Export(ListFilters.Products(db.Products.AsNoTracking(), search, lowStock), context.RequestAborted))
+    .WithDescription("Download all matching company products as a streamed UTF-8 CSV. Accepts the same search and lowStock filters as /products. Text cells are quoted and potential spreadsheet formulas are prefixed with an apostrophe; CSV is not a lossless data interchange format.")
+    .Produces(StatusCodes.Status200OK, contentType: "text/csv");
 api.MapGet("/products", (AppDbContext db, HttpContext context, int page = 1, int pageSize = 250, string? search = null, bool? lowStock = null) =>
     PagedQuery.Read(ListFilters.Products(db.Products.AsNoTracking(), search, lowStock).OrderBy(x => x.Name).ThenBy(x => x.Id), context, page, pageSize))
     .WithDescription("Company-scoped products ordered by name, then ID. search matches a name/SKU substring (max 100 characters); lowStock selects products at/below their available-stock threshold when true, or above it when false. page starts at 1; pageSize is 1–250 (default 250). Returns an array with filtered X-Total-Count, X-Page and X-Page-Size response headers.");
