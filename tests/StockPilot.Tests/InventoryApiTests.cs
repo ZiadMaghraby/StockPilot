@@ -239,6 +239,7 @@ public partial class InventoryApiTests : IDisposable
         { ["__RequestVerificationToken"] = loginToken, ["Email"] = email, ["Password"] = Password }))).StatusCode);
         await Csrf(member);
         Assert.Equal(HttpStatusCode.OK, (await member.GetAsync("/api/products")).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await member.GetAsync("/api/products/export.csv")).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await member.PostAsJsonAsync("/api/products", new CreateProduct("X", "X", "X", 10, 1))).StatusCode);
         Assert.Equal(expectedOrderStatus, (await member.PostAsJsonAsync("/api/orders", new CreateOrder(product.Id, 1, "Customer", Guid.NewGuid()))).StatusCode);
         var team = await member.GetAsync("/Team");

@@ -19,6 +19,7 @@ StockPilot is a multi-tenant inventory application built with ASP.NET Core 10, E
 - **Auditability:** stock movements and operational changes are recorded with actor and UTC timestamp.
 - **Dashboard:** inventory value, available stock, pending shipments, low-stock alerts, and recent activity.
 - **HTTP API:** authenticated endpoints with CSRF protection, paginated lists, product search/stock filters, order status/date filters, and an OpenAPI document.
+- **Inventory export:** filtered, company-scoped CSV downloads with Unicode support and spreadsheet formula-prefix protection.
 - **Verification:** HTTP integration and tenant write-guard tests over real SQLite databases; GitHub Actions builds, tests, and publishes.
 
 This is **v0.1, a working portfolio/local-demo baseline**. It uses one stock location per company and one product per order. Production deployment and the next capabilities are tracked in [issues](https://github.com/ZiadMaghraby/StockPilot/issues).
