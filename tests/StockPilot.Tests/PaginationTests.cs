@@ -12,7 +12,7 @@ namespace StockPilot.Tests;
 
 public partial class InventoryApiTests
 {
-    private async Task SeedPagedData(Product product)
+    private async Task SeedPagedData(Product product, DateTime? timestamp = null)
     {
         using var scope = app.Services.CreateScope();
         var accessor = new HttpContextAccessor
@@ -23,11 +23,11 @@ public partial class InventoryApiTests
             }
         };
         await using var db = new AppDbContext(scope.ServiceProvider.GetRequiredService<DbContextOptions<AppDbContext>>(), new TenantSession(accessor));
-        var createdAt = DateTime.UtcNow;
+        var createdAt = timestamp ?? DateTime.UtcNow;
         for (var i = 0; i < 260; i++)
         {
             db.Products.Add(new Product { TenantId = product.TenantId, Name = product.Name, Sku = $"PAGE-{i:D3}" });
-            db.Orders.Add(new SalesOrder { TenantId = product.TenantId, ProductId = product.Id, RequestId = Guid.NewGuid(), Quantity = 1, CreatedAt = createdAt });
+            db.Orders.Add(new SalesOrder { TenantId = product.TenantId, ProductId = product.Id, RequestId = Guid.NewGuid(), Quantity = 1, CreatedAt = createdAt, Status = (OrderStatus)(i % 3) });
             db.Movements.Add(new StockMovement { TenantId = product.TenantId, ProductId = product.Id, Quantity = 1, CreatedAt = createdAt });
             db.Audit.Add(new AuditEntry { TenantId = product.TenantId, CreatedAt = createdAt });
         }

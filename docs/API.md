@@ -32,7 +32,23 @@ For example, `GET /api/products?page=2&pageSize=50` returns the next 50 products
 
 Products sort by name then ID ascending. Orders, movements, and audit events sort by creation time then ID descending. The ID tie-breaker keeps pages deterministic when names or timestamps match. Pagination uses offsets, not a snapshot: concurrent additions or deletions can shift page boundaries, and counts and rows are read separately. Clients needing a snapshot should not treat multiple page requests as one atomic export.
 
-The web interface still uses bounded lists; API pagination does not change its forms. Filters and CSV exports remain tracked in issue #8.
+The web interface still uses bounded lists; API pagination does not change its forms. Web pagination and CSV exports remain tracked in issue #8.
+
+## List filters
+
+Filters are optional and combined before pagination. `X-Total-Count` reports the number of matching records in the signed-in company.
+
+| Endpoint | Parameter | Behavior |
+| --- | --- | --- |
+| `/api/products` | `search` | Trimmed name or SKU substring, at most 100 characters; blank means no filter. Matching follows the database provider's case sensitivity (case-sensitive for the default SQLite provider). `%` and `_` are literal characters, not wildcards. |
+| `/api/products` | `lowStock` | `true`: available stock is at or below the reorder point; `false`: above it; omitted: both. Available stock subtracts reservations. |
+| `/api/orders` | `status` | `Reserved`, `Confirmed`, or `Cancelled`. Unknown statuses are rejected. |
+| `/api/orders` | `createdFrom` | Inclusive creation time lower bound. |
+| `/api/orders` | `createdBefore` | Exclusive creation time upper bound. Must be later than `createdFrom` when both are supplied. |
+
+Use ISO 8601 timestamps with `Z` or an explicit UTC offset; offset timestamps are normalized to UTC. URL-encode `+` as `%2B`. For a UTC day, use `createdFrom=2026-01-02T00:00:00Z&createdBefore=2026-01-03T00:00:00Z`. Exclusive upper bounds allow adjacent date windows without counting boundary records twice.
+
+Examples: `/api/products?search=KB-&lowStock=true&pageSize=50` and `/api/orders?status=Reserved&createdBefore=2026-01-03T00:00:00Z`. Invalid booleans, statuses, dates, reversed/empty date windows, and overlong search terms return `400`.
 
 ## Payloads
 
