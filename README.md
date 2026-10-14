@@ -19,7 +19,7 @@ StockPilot is a multi-tenant inventory application built with ASP.NET Core 10, E
 - **Auditability:** stock movements and operational changes are recorded with actor and UTC timestamp.
 - **Dashboard:** inventory value, available stock, pending shipments, low-stock alerts, and recent activity.
 - **HTTP API:** authenticated endpoints with CSRF protection and an OpenAPI document.
-- **Verification:** 24 HTTP integration cases and 36 tenant write-guard cases over real SQLite databases; GitHub Actions builds, tests, and publishes.
+- **Verification:** 27 HTTP integration cases and 36 tenant write-guard cases over real SQLite databases; GitHub Actions builds, tests, and publishes.
 
 This is **v0.1, a working portfolio/local-demo baseline**. It uses one stock location per company and one product per order. Production deployment and the next capabilities are tracked in [issues](https://github.com/ZiadMaghraby/StockPilot/issues).
 
@@ -62,7 +62,7 @@ Tests create isolated temporary SQLite databases and exercise the actual HTTP au
 - Every synchronous and asynchronous `SaveChanges` overload enforces tenant ownership, including calls that defer accepting tracked changes.
 - Viewers cannot write; Operators cannot create products or manage the team.
 - Invalid quantities/prices and overselling leave data unchanged.
-- Malformed order form fields leave orders, stock, movements, and audit records unchanged; valid form retries reserve only once.
+- Missing, empty, or malformed order request IDs leave orders, stock, movements, and audit records unchanged; valid form retries reserve only once.
 - Every operational page and the OpenAPI document renders for an administrator.
 
 These are correctness tests, **not a throughput benchmark**. The initial dependency audit reported no known vulnerable direct or transitive packages in the configured sources.

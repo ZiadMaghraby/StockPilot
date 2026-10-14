@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using StockPilot.Web.Domain;
@@ -10,7 +11,7 @@ public class OrdersModel(AppDbContext db, InventoryService inventory) : PageMode
 {
     public List<SalesOrder> Orders { get; set; } = [];
     public List<Product> Products { get; set; } = [];
-    [BindProperty] public Guid RequestId { get; set; } = Guid.NewGuid();
+    [BindProperty, BindRequired] public Guid RequestId { get; set; } = Guid.NewGuid();
     public async Task OnGetAsync()
     {
         Orders = await db.Orders.AsNoTracking().OrderByDescending(x => x.CreatedAt).Take(100).ToListAsync();

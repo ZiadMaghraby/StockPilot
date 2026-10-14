@@ -326,6 +326,40 @@ public class InventoryApiTests : IDisposable
         Assert.Equal(movementsBefore, (await client.GetFromJsonAsync<List<StockMovement>>("/api/movements", Json))!.Count);
     }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("00000000-0000-0000-0000-000000000000")]
+    public async Task Order_form_requires_explicit_nonempty_request_id(string? requestId)
+    {
+        using var client = await Workspace();
+        var product = await Product(client);
+        var token = await FormToken(client, "/Orders");
+        var auditBefore = await client.GetStringAsync("/api/audit");
+        var movementsBefore = await client.GetStringAsync("/api/movements");
+        var form = new Dictionary<string, string>
+        {
+            ["__RequestVerificationToken"] = token,
+            ["productId"] = product.Id.ToString(),
+            ["quantity"] = "3",
+            ["customer"] = "Form customer"
+        };
+        if (requestId is not null) form["RequestId"] = requestId;
+
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            var response = await client.PostAsync("/Orders?handler=Create", new FormUrlEncodedContent(form));
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        Assert.Empty((await client.GetFromJsonAsync<List<SalesOrder>>("/api/orders", Json))!);
+        var stock = await ReadProduct(client);
+        Assert.Equal(10, stock.OnHand);
+        Assert.Equal(0, stock.Reserved);
+        Assert.Equal(auditBefore, await client.GetStringAsync("/api/audit"));
+        Assert.Equal(movementsBefore, await client.GetStringAsync("/api/movements"));
+    }
+
     [Fact]
     public async Task Valid_order_form_retries_keep_one_reservation()
     {
