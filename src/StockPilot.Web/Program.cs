@@ -87,12 +87,12 @@ app.MapHealthChecks("/health").AllowAnonymous();
 app.MapOpenApi().RequireAuthorization();
 var api = app.MapGroup("/api").RequireAuthorization();
 api.MapGet("/csrf", (IAntiforgery csrf, HttpContext context) => Results.Ok(new { token = csrf.GetAndStoreTokens(context).RequestToken }));
-api.MapGet("/products", (AppDbContext db, HttpContext context, int page = 1, int pageSize = 250) =>
-    PagedQuery.Read(db.Products.AsNoTracking().OrderBy(x => x.Name).ThenBy(x => x.Id), context, page, pageSize))
-    .WithDescription("Company-scoped products ordered by name, then ID. page starts at 1; pageSize is 1–250 (default 250). Returns an array with X-Total-Count, X-Page and X-Page-Size response headers.");
-api.MapGet("/orders", (AppDbContext db, HttpContext context, int page = 1, int pageSize = 250) =>
-    PagedQuery.Read(db.Orders.AsNoTracking().OrderByDescending(x => x.CreatedAt).ThenByDescending(x => x.Id), context, page, pageSize))
-    .WithDescription("Company-scoped orders ordered by creation time, then ID, descending. page starts at 1; pageSize is 1–250 (default 250). Returns an array with X-Total-Count, X-Page and X-Page-Size response headers.");
+api.MapGet("/products", (AppDbContext db, HttpContext context, int page = 1, int pageSize = 250, string? search = null, bool? lowStock = null) =>
+    PagedQuery.Read(ListFilters.Products(db.Products.AsNoTracking(), search, lowStock).OrderBy(x => x.Name).ThenBy(x => x.Id), context, page, pageSize))
+    .WithDescription("Company-scoped products ordered by name, then ID. search matches a name/SKU substring (max 100 characters); lowStock selects products at/below their available-stock threshold when true, or above it when false. page starts at 1; pageSize is 1–250 (default 250). Returns an array with filtered X-Total-Count, X-Page and X-Page-Size response headers.");
+api.MapGet("/orders", (AppDbContext db, HttpContext context, int page = 1, int pageSize = 250, OrderStatus? status = null, DateTimeOffset? createdFrom = null, DateTimeOffset? createdBefore = null) =>
+    PagedQuery.Read(ListFilters.Orders(db.Orders.AsNoTracking(), status, createdFrom, createdBefore).OrderByDescending(x => x.CreatedAt).ThenByDescending(x => x.Id), context, page, pageSize))
+    .WithDescription("Company-scoped orders ordered by creation time, then ID, descending. status is Reserved, Confirmed or Cancelled. createdFrom is inclusive and createdBefore exclusive; supply ISO 8601 timestamps with Z or a UTC offset. page starts at 1; pageSize is 1–250 (default 250). Returns an array with filtered X-Total-Count, X-Page and X-Page-Size response headers.");
 api.MapGet("/orders/{id:guid}", async (Guid id, AppDbContext db) =>
     await db.Orders.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id) is { } order ? Results.Ok(order) : Results.NotFound());
 api.MapGet("/movements", (AppDbContext db, HttpContext context, int page = 1, int pageSize = 250) =>
