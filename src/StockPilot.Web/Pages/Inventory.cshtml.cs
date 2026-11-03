@@ -17,6 +17,7 @@ public class InventoryModel(AppDbContext db, InventoryService inventory) : PageM
     [BindProperty] public int ReorderPoint { get; set; } = 10;
     public async Task OnGetAsync()
     {
+        Search = Search?.Trim();
         var query = db.Products.AsNoTracking();
         if (!string.IsNullOrWhiteSpace(Search)) query = query.Where(x => x.Name.Contains(Search) || x.Sku.Contains(Search));
         Products = await query.OrderBy(x => x.Name).Take(250).ToListAsync();
